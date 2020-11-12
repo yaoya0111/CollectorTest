@@ -38,19 +38,23 @@ bool Collector::collect4commit() {
 
 int Collector::openPreparePort() {
     LOG(__func__);
+    // epoll
     listenPreparefd = Open_listenfd(PreparePort);
     sockaddr_in serverAddr{};
     socklen_t serverAddrLen = sizeof(serverAddr);
     int connfd = Accept(listenPreparefd, (sockaddr*) &serverAddr, &serverAddrLen);
     rio_t rio{};
     char buf[MAXBUF];
+    char retBuf[] = "get";
     Rio_readinitb(&rio, connfd);
     size_t n;
     // write to testFile test message
     while ((n = Rio_readlineb(&rio, buf, MAXLINE) != 0)) {
         Rio_writen(1, buf, strlen(buf));
+        Rio_writen(connfd, retBuf, strlen(retBuf));
     }
     close(connfd);
+    return 0;
 }
 
 int Collector::openCommitPort() {
